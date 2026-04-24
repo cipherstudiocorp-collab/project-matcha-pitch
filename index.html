@@ -624,20 +624,40 @@
       }
     }
 
-    /* --- storefront full-bleed --- */
+    /* --- storefront full-bleed (video) --- */
     .place {
       position: relative;
-      height: clamp(480px, 80vh, 820px);
-      background: url('images/storefront.jpg') center/cover no-repeat;
-      background-attachment: fixed;
+      height: clamp(480px, 90vh, 900px);
+      overflow: hidden;
+      isolation: isolate;
+      background: var(--c-ink);
     }
-    @media (hover: none), (max-width: 720px) {
-      .place { background-attachment: scroll; }
+    .place__video {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center center;
+      z-index: 0;
+    }
+    .place::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      pointer-events: none;
+      background:
+        linear-gradient(180deg,
+          oklch(18% 0.012 150 / 0.12) 0%,
+          oklch(18% 0.012 150 / 0.05) 55%,
+          oklch(18% 0.012 150 / 0.55) 100%);
     }
     .place__caption {
       position: absolute;
       left: var(--page-pad);
       bottom: var(--s-8);
+      z-index: 2;
       color: var(--c-cream);
       font-family: 'Gloock', serif;
       font-size: var(--t-xs);
@@ -1040,8 +1060,11 @@
       </div>
     </section>
 
-    <!-- STOREFRONT FULL-BLEED -->
+    <!-- STOREFRONT FULL-BLEED (video) -->
     <section class="place" aria-label="The shop, 555 NE Couch Street">
+      <video class="place__video" autoplay muted loop playsinline preload="metadata" poster="images/shop-poster.jpg" aria-hidden="true">
+        <source src="video/shop.mp4" type="video/mp4" />
+      </video>
       <p class="place__caption">The shop &nbsp;·&nbsp; 555 NE Couch Street</p>
     </section>
 
@@ -1179,16 +1202,18 @@
       els.forEach(el => io.observe(el));
     })();
 
-    // subtle hero parallax + reduced-motion video pause
+    // subtle hero parallax + reduced-motion pause for all videos
     (function () {
-      const vid = document.querySelector('.hero__video');
-      if (!vid) return;
       const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       if (prefersReduced) {
-        vid.removeAttribute('autoplay');
-        vid.pause();
+        document.querySelectorAll('video').forEach((v) => {
+          v.removeAttribute('autoplay');
+          try { v.pause(); } catch (e) {}
+        });
         return;
       }
+      const vid = document.querySelector('.hero__video');
+      if (!vid) return;
       let raf = null;
       const onScroll = () => {
         if (raf) return;
