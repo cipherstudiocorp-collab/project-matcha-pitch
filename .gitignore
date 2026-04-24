@@ -1,0 +1,6 @@
+screenshots/
+video/*-raw.mp4
+screenshot.mjs
+screenshot-sections.mjs
+.DS_Store
+Thumbs.db
